@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pterodactyl Cleanup API - Public Service</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; 
+               line-height: 1.6; color: #333; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; color: white; padding: 60px 20px; }
+        h1 { font-size: 3rem; margin-bottom: 20px; }
+        .tagline { font-size: 1.2rem; opacity: 0.9; }
+        .card { background: white; border-radius: 10px; padding: 30px; margin: 20px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .endpoint { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0; font-family: monospace; }
+        .btn { display: inline-block; background: #667eea; color: white; padding: 12px 24px; 
+               border-radius: 5px; text-decoration: none; margin: 10px 5px; transition: background 0.3s; }
+        .btn:hover { background: #5a67d8; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 40px 0; }
+        .feature { padding: 20px; border-left: 4px solid #667eea; }
+        code { background: #f5f5f5; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 5px; overflow-x: auto; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🦖 Pterodactyl Cleanup API</h1>
+            <p class="tagline">A free public API for automating Pterodactyl Panel maintenance</p>
+            <a href="#try-it" class="btn">Try It Now</a>
+            <a href="#docs" class="btn" style="background: #4caf50;">Documentation</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>🚀 Quick Start</h2>
+            <p>Test your API key:</p>
+            <div class="endpoint">POST /api/test-connection</div>
+            
+            <div id="test-form">
+                <input type="text" id="panelUrl" placeholder="https://panel.yoursite.com" style="width: 100%; padding: 10px; margin: 10px 0;">
+                <input type="text" id="apiKey" placeholder="ptla_your_api_key" style="width: 100%; padding: 10px; margin: 10px 0;">
+                <button onclick="testConnection()" class="btn">Test Connection</button>
+                <div id="test-result"></div>
+            </div>
+        </div>
+
+        <div class="card" id="try-it">
+            <h2>🔧 Cleanup API</h2>
+            <div class="endpoint">POST /api/cleanup</div>
+            
+            <h3>Example Request:</h3>
+            <pre><code>{
+  "panelUrl": "https://panel.yoursite.com",
+  "apiKey": "ptla_your_api_key",
+  "actions": ["deleteOfflineServers", "deleteEmptyUsers"],
+  "dryRun": true,
+  "options": {
+    "inactiveDays": 30
+  }
+}</code></pre>
+            
+            <button onclick="runCleanup()" class="btn">Run Cleanup (Dry Run)</button>
+            <div id="cleanup-result"></div>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <h3>🔄 Delete Offline Servers</h3>
+                <p>Automatically identify and remove servers that are offline, suspended, or stuck installing.</p>
+            </div>
+            <div class="feature">
+                <h3>🧹 Clean Up Users</h3>
+                <p>Remove users who don't have any servers or have been inactive for too long.</p>
+            </div>
+            <div class="feature">
+                <h3>🛡️ Safe & Secure</h3>
+                <p>All operations require your API key. We never store your credentials.</p>
+            </div>
+        </div>
+
+        <div class="card" id="docs">
+            <h2>📚 Documentation</h2>
+            <h3>Actions Available:</h3>
+            <ul>
+                <li><code>deleteOfflineServers</code> - Delete servers that are offline/suspended</li>
+                <li><code>deleteAllServers</code> - Delete ALL servers (use with caution!)</li>
+                <li><code>deleteEmptyUsers</code> - Delete users with no servers</li>
+                <li><code>deleteInactiveUsers</code> - Delete users inactive for X days</li>
+            </ul>
+            
+            <h3>Rate Limits:</h3>
+            <p>10 requests per hour per IP address</p>
+            
+            <h3>Source Code:</h3>
+            <p>This project is open source! <a href="https://github.com/yourusername/ptero-cleanup-public">View on GitHub</a></p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        
+        async function testConnection() {
+            const panelUrl = document.getElementById('panelUrl').value;
+            const apiKey = document.getElementById('apiKey').value;
+            const resultDiv = document.getElementById('test-result');
+            
+            resultDiv.innerHTML = '<p>Testing connection...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/test-connection`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ panelUrl, apiKey })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                            ✅ <strong>Connection successful!</strong><br>
+                            Panel: ${data.panel}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                            ❌ <strong>Connection failed:</strong> ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                        ❌ <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        async function runCleanup() {
+            const panelUrl = document.getElementById('panelUrl').value || 'https://demo.panel.com';
+            const apiKey = document.getElementById('apiKey').value || 'ptla_demo_key';
+            const resultDiv = document.getElementById('cleanup-result');
+            
+            resultDiv.innerHTML = '<p>Running cleanup (dry run)...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/cleanup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        panelUrl,
+                        apiKey,
+                        actions: ['deleteOfflineServers', 'deleteEmptyUsers'],
+                        dryRun: true
+                    })
+                });
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+  </html>
