@@ -1,20 +1,8 @@
 {
   "name": "ptero-cleanup",
   "version": "1.0.0",
-  "description": "Public API for Pterodactyl Panel cleanup",
-  "main": "api/cleanup.js",
-  "scripts": {
-    "dev": "vercel dev",
-    "start": "node api/cleanup.js",
-    "deploy": "vercel --prod"
-  },
-  "dependencies": {
-    "axios": "^1.6.0"
-  },
+  "type": "module",
   "engines": {
-    "node": ">=20"
-  },
-  "keywords": ["pterodactyl", "api", "cleanup", "automation"],
-  "author": "BimxyzDev",
-  "license": "MIT"
+    "node": "18.x"
+  }
 }
